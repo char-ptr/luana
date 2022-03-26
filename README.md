@@ -5,7 +5,7 @@ lua packager
 ## features
 currently has support for 
 - minification
-- importing from other files
+- importing from other files as text and data structures
 - -  json to table
 - importing other code into one file.
 
