@@ -215,9 +215,9 @@ impl vistAst {
                 Value::Number(TokenReference::new(vec![], Token::new(TokenType::Number { text: n.to_string().into() }), vec![]))
             },
             serde_json::Value::String(s) => {
-                Value::String(TokenReference::new(vec![Token::new(TokenType::Symbol { symbol: full_moon::tokenizer::Symbol::LeftBracket })], 
+                Value::String(TokenReference::new(vec![], 
                     Token::new(TokenType::StringLiteral  { literal: s.to_string().into(), multi_line:None,quote_type: full_moon::tokenizer::StringLiteralQuoteType::Single }), 
-                    vec![Token::new(TokenType::Symbol { symbol: full_moon::tokenizer::Symbol::RightBracket })]))
+                    vec![]))
             },
             serde_json::Value::Array(a) => {
                 let t = TableConstructor::new();

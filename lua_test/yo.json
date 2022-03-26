@@ -1,3 +1,19 @@
 {
-    "poggers":true
+    "poggers":true,
+    "yes":[
+        1,
+        "two",
+        [
+            "whyyyy",
+            6
+        ],
+        {
+            "true":false,
+            "html":{
+                "lol":"no",
+                "qwerty":null
+            }
+
+        }
+    ]
 }

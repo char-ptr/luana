@@ -1,1 +1,1 @@
-;print("wow poggers!");do;print("gamer!");do;;end;end;;local poggers = { ['poggers']=true, };;;print(poggers.poggers,'hi\nd\nddd\nd');
+;print("wow poggers!");do;print("gamer!");do;;end;end;;local poggers = { ['poggers']=true,['yes']={ 1,'two',{ 'whyyyy',6, },{ ['html']={ ['lol']='no',['qwerty']=nil, },['true']=false, }, }, };;;print(poggers.poggers,'hi\nd\nddd\nd');
