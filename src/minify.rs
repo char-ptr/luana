@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use full_moon::{visitors::VisitorMut, tokenizer::{Token, TokenReference}};
+use full_moon::{visitors::VisitorMut, tokenizer::{Token, TokenReference, TokenType}};
 
 const VARIABLE_LETTERS:&'static str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
 
@@ -51,6 +51,12 @@ impl VisitorMut for MinifyVisiter {
         new_node
     }
 
+    fn visit_single_line_comment(&mut self, token:Token) ->Token {
+        Token::new(TokenType::Whitespace { characters: "".into() })
+    }
+    fn visit_multi_line_comment(&mut self, token:Token) ->Token {
+        Token::new(TokenType::Whitespace { characters: "".into() })
+    }
     // fn visit_local_assignment(&mut self, node:full_moon::ast::LocalAssignment) ->full_moon::ast::LocalAssignment {
     //     self.new_var("pog");
     //     println!("var : {:#?}",node.to_string());

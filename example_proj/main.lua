@@ -19,6 +19,8 @@ io.flush()
 pog = 1;
 notpog = 2
 
+-- this should get stripped in minify mode..
+
 local mod = _load("./testmodule.lua")
 
 print("module: ",mod.poggers)
