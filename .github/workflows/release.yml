@@ -26,9 +26,9 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          automatic_release_tag: "latest-linux"
           prerelease: true
-          title: "Release Build"
+          title: "Release Build linux"
           files: |
             target/release/luana
       # - uses: actions/upload-artifact@v3
@@ -52,9 +52,9 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          automatic_release_tag: "latest-win32"
           prerelease: true
-          title: "Release Build"
+          title: "Release Build win32"
           files: |
             target/release/luana.exe
       # - uses: actions/upload-artifact@v3
