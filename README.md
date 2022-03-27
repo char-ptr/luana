@@ -6,7 +6,9 @@ lua packager for lua5.2+ (with support for some luau features)
 currently has support for 
 - minification
 - importing from other files as text and data structures
-- -  json to table
+- - json to table
+- - raw bytes
+- - plain text
 - importing other code into one file.
 
 Look at lua_test folder to see what it looks like.
