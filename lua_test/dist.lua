@@ -1,2 +1,2 @@
-;print("wow poggers!");do;print("gamer!");do;;end;end;;local poggers = { ['poggers']=true,['yes']={ 1,'two',{ 'whyyyy',6, },{ ['html']={ ['lol']='no',['qwerty']=nil, },['true']=false, }, }, };;;print(poggers.poggers,'hi\nd\nddd\nd');;for _,v in next, { 104,105,13,10,100,13,10,100,100,100,13,10,100, }do;;    print(string.char(v));;end;
+print("wow poggers!") load("gamer.lua") local poggers = { ['poggers']=true,['yes']={ 1,'two',{ 'whyyyy',6,},{ ['html']={ ['lol']='no',['qwerty']=nil,},['true']=false,},},}print(poggers.poggers,'hi\nd\nddd\nd') for _,v in next, { 104,105,13,10,100,13,10,100,100,100,13,10,100,}do print(string.char(v)) end 
 -- local imglol = "!import pog.png"

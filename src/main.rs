@@ -3,7 +3,7 @@ use std::io::prelude::*;
 
 use full_moon::parse;
 use full_moon::visitors::VisitorMut;
-use luana::vistAst;
+use luana::VistAst;
 
 macro_rules! test_speed {
     ($label:literal,$code:block) => {
@@ -30,10 +30,12 @@ fn main() {
     main_file.read_to_string(&mut code);
     test_speed!("generating ast",let ast = parse(&code));
     if let Ok(ast) = ast {
-        let mut visit = vistAst::default();
+        let mut visit = VistAst::default();
         visit.set_project_dir(proj.clone());
         visit.set_file_name("main.lua");
         test_speed!("visiting ast",let ast = visit.visit_ast(ast));
+        let mut minifier = luana::minify::MinifyVisiter::default();
+        test_speed!("minifing",let ast = minifier.visit_ast(ast));
 
         // println!("{}", full_moon::print(&ast));
 

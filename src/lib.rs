@@ -2,21 +2,24 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::io::prelude::*;
 
+pub mod minify;
+
 
 use full_moon::ast::punctuated::{Punctuated, Pair};
-use full_moon::ast::{Ast, FunctionCall, Call, Do, Block, Stmt, Value, TableConstructor, Field, Expression};
+use full_moon::ast::{Call, Do, Stmt, Value, TableConstructor, Field, Expression};
 use full_moon::node::Node;
 use full_moon::tokenizer::{Token, TokenType, TokenReference};
 use full_moon::visitors::*;
 #[derive(Default)]
-pub struct vistAst {
+
+pub struct VistAst {
     project_dir: PathBuf,
     imports: Vec<String>,
     previous_imports: Vec<String>,
     previous_file_name: String,
     file_name: String,
 }
-impl VisitorMut for vistAst {
+impl VisitorMut for VistAst {
     fn visit_stmt(&mut self, node:full_moon::ast::Stmt) ->full_moon::ast::Stmt {
         let mut new_node = node.clone();
         match node {
@@ -38,7 +41,7 @@ impl VisitorMut for vistAst {
                                                 let first_arg = arguments.iter().next();
                                                 if let Some(arg) = first_arg {
                                                     match arg {
-                                                        full_moon::ast::Expression::Value { value, type_assertion } => {
+                                                        full_moon::ast::Expression::Value { value, type_assertion:_ } => {
                                                             match *value.clone() {
                                                                 full_moon::ast::Value::String(s) => {
                                                                     load_file_name = self.get_token_name(s.token_type());
@@ -69,7 +72,7 @@ impl VisitorMut for vistAst {
                                             else {
                                                 
                                                 let load_path = self.project_dir.join(&load_file_name);
-                                                let mut load_file = File::open(&load_path);
+                                                let load_file = File::open(&load_path);
                                                 if load_file.is_err() {
                                                     println!("Unable to open / find file @ {}", load_path.to_str().unwrap());
                                                 }
@@ -78,7 +81,7 @@ impl VisitorMut for vistAst {
                                                 let load_path_parent = load_path.parent().unwrap();
                                                 load_file.unwrap().read_to_string(&mut code);
     
-                                                let mut astvist = vistAst::default();
+                                                let mut astvist = VistAst::default();
                                                 astvist.set_project_dir(load_path_parent.to_path_buf());
                                                 astvist.set_file_name(&load_file_name);
                                                 astvist.previous_imports = self.imports.clone();
@@ -117,22 +120,23 @@ impl VisitorMut for vistAst {
         };
         new_node
     }
-    fn visit_whitespace(&mut self, token:Token) ->Token {
+    // fn visit_whitespace(&mut self, token:Token) ->Token {
      
-        let mut new_token = token.clone();
-        match token.token_type() {
-            TokenType::Whitespace { characters } =>{
-                // println!("ch - {:?}", characters);
-                if characters.contains("\n") {
-                    new_token = Token::new(TokenType::Symbol { symbol: full_moon::tokenizer::Symbol::Semicolon })
-                }
-            }
-            _=>{},
-        }
+    //     let mut new_token = token.clone();
+    //     println!("WS: {:?}", token);
+    //     match token.token_type() {
+    //         TokenType::Whitespace { characters } =>{
+    //             // println!("ch - {:?}", characters);
+    //             if characters.contains("\n") {
+    //                 new_token = Token::new(TokenType::Symbol { symbol: full_moon::tokenizer::Symbol::Semicolon })
+    //             }
+    //         }
+    //         _=>{},
+    //     }
 
-        new_token
+    //     new_token
 
-    }
+    // }
     fn visit_value(&mut self, node:full_moon::ast::Value) ->full_moon::ast::Value {
         let mut new_node = node.clone();
         match node {
@@ -146,7 +150,7 @@ impl VisitorMut for vistAst {
                     }
                     println!("importing file: {}", file_name);
                     let load_path = self.project_dir.join(file_name);
-                    let mut load_file = File::open(&load_path);
+                    let load_file = File::open(&load_path);
                     if load_file.is_err() {
                         println!("Unable to open / find file @ {}", load_path.to_str().unwrap());
                     }
@@ -196,7 +200,7 @@ impl VisitorMut for vistAst {
     }
 }
 
-impl vistAst {
+impl VistAst {
     pub fn set_project_dir(&mut self, project_dir: PathBuf) {
         self.project_dir = project_dir;
     }
@@ -214,7 +218,7 @@ impl vistAst {
             TokenType::Number { text } => text.to_string(),
             // TokenType::Shebang { line } => todo!(),
             // TokenType::SingleLineComment { comment } => todo!(),
-            TokenType::StringLiteral { literal, multi_line, quote_type } => literal.to_string(),
+            TokenType::StringLiteral { literal, multi_line: _, quote_type: _ } => literal.to_string(),
             TokenType::Symbol { symbol } => symbol.to_string(),
             // TokenType::Whitespace { characters } => todo!(),
             _ => String::from("Unknown"),
@@ -270,3 +274,11 @@ impl vistAst {
         }
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     #[test]
+//     fn it_works() {
+//         assert_eq!(2 + 2, 4);
+//     }
+// }
