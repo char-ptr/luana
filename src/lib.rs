@@ -6,7 +6,8 @@ pub mod minify;
 
 
 use full_moon::ast::punctuated::{Punctuated, Pair};
-use full_moon::ast::{Call, Do, Stmt, Value, TableConstructor, Field, Expression};
+use full_moon::ast::span::ContainedSpan;
+use full_moon::ast::{Call, Do, Stmt, Value, TableConstructor, Field, Expression, FunctionBody};
 use full_moon::node::Node;
 use full_moon::tokenizer::{Token, TokenType, TokenReference};
 use full_moon::visitors::*;
@@ -20,106 +21,106 @@ pub struct VistAst {
     file_name: String,
 }
 impl VisitorMut for VistAst {
-    fn visit_stmt(&mut self, node:full_moon::ast::Stmt) ->full_moon::ast::Stmt {
-        let mut new_node = node.clone();
-        match node {
+    // fn visit_stmt(&mut self, node:full_moon::ast::Stmt) ->full_moon::ast::Stmt {
+    //     let mut new_node = node.clone();
+    //     match node {
 
-            full_moon::ast::Stmt::FunctionCall(ref fnc) => {
+    //         full_moon::ast::Stmt::FunctionCall(ref fnc) => {
 
-                let prefix = fnc.prefix().to_string();
+    //             let prefix = fnc.prefix().to_string();
 
-                match prefix.trim() {
-                    "_load" => {
-                        let call_paren = fnc.suffixes().next().expect("called load without filename");
-                        match call_paren {
-                            full_moon::ast::Suffix::Call(c) => {
-                                match c {
-                                    Call::AnonymousCall(ac) => {
-                                        let mut load_file_name = String::new();
-                                        match ac {
-                                            full_moon::ast::FunctionArgs::Parentheses { parentheses: _, arguments } => {
-                                                let first_arg = arguments.iter().next();
-                                                if let Some(arg) = first_arg {
-                                                    match arg {
-                                                        full_moon::ast::Expression::Value { value, type_assertion:_ } => {
-                                                            match *value.clone() {
-                                                                full_moon::ast::Value::String(s) => {
-                                                                    load_file_name = self.get_token_name(s.token_type());
-                                                                },
-                                                                _ => {
-                                                                    println!("please just pass a string...");
-                                                                }
-                                                            }
-                                                        },
-                                                        _ => {println!("im sorry but i really cannot be bothered parsing, please just pass a string ");}
-                                                    }
-                                                }
-                                            },
-                                            full_moon::ast::FunctionArgs::String(_) => todo!(),
-                                            _ => {
-                                                println!("invalid load @ {:?}", fnc.start_position());
-                                            },
-                                        }
-                                        if !load_file_name.is_empty() {
+    //             match prefix.trim() {
+    //                 "_load" => {
+    //                     let call_paren = fnc.suffixes().next().expect("called load without filename");
+    //                     match call_paren {
+    //                         full_moon::ast::Suffix::Call(c) => {
+    //                             match c {
+    //                                 Call::AnonymousCall(ac) => {
+    //                                     let mut load_file_name = String::new();
+    //                                     match ac {
+    //                                         full_moon::ast::FunctionArgs::Parentheses { parentheses: _, arguments } => {
+    //                                             let first_arg = arguments.iter().next();
+    //                                             if let Some(arg) = first_arg {
+    //                                                 match arg {
+    //                                                     full_moon::ast::Expression::Value { value, type_assertion:_ } => {
+    //                                                         match *value.clone() {
+    //                                                             full_moon::ast::Value::String(s) => {
+    //                                                                 load_file_name = self.get_token_name(s.token_type());
+    //                                                             },
+    //                                                             _ => {
+    //                                                                 println!("please just pass a string...");
+    //                                                             }
+    //                                                         }
+    //                                                     },
+    //                                                     _ => {println!("im sorry but i really cannot be bothered parsing, please just pass a string ");}
+    //                                                 }
+    //                                             }
+    //                                         },
+    //                                         full_moon::ast::FunctionArgs::String(_) => todo!(),
+    //                                         _ => {
+    //                                             println!("invalid load @ {:?}", fnc.start_position());
+    //                                         },
+    //                                     }
+    //                                     if !load_file_name.is_empty() {
 
-                                            if load_file_name == self.previous_file_name {
-                                                println!("detected circular import giving empty");
-                                                let do_block = Do::new();
-                                                // let do_block= do_block.with_block(ast.nodes().to_owned());
-                                                new_node = Stmt::Do(do_block);
+    //                                         if load_file_name == self.previous_file_name {
+    //                                             println!("detected circular import giving empty");
+    //                                             let do_block = Do::new();
+    //                                             // let do_block= do_block.with_block(ast.nodes().to_owned());
+    //                                             new_node = Stmt::Do(do_block);
                                             
-                                            }
-                                            else {
+    //                                         }
+    //                                         else {
                                                 
-                                                let load_path = self.project_dir.join(&load_file_name);
-                                                let load_file = File::open(&load_path);
-                                                if load_file.is_err() {
-                                                    println!("Unable to open / find file @ {}", load_path.to_str().unwrap());
-                                                }
-                                                self.imports.push(load_file_name.clone());
-                                                let mut code = String::new();
-                                                let load_path_parent = load_path.parent().unwrap();
-                                                load_file.unwrap().read_to_string(&mut code);
+    //                                             let load_path = self.project_dir.join(&load_file_name);
+    //                                             let load_file = File::open(&load_path);
+    //                                             if load_file.is_err() {
+    //                                                 println!("Unable to open / find file @ {}", load_path.to_str().unwrap());
+    //                                             }
+    //                                             self.imports.push(load_file_name.clone());
+    //                                             let mut code = String::new();
+    //                                             let load_path_parent = load_path.parent().unwrap();
+    //                                             load_file.unwrap().read_to_string(&mut code);
     
-                                                let mut astvist = VistAst::default();
-                                                astvist.set_project_dir(load_path_parent.to_path_buf());
-                                                astvist.set_file_name(&load_file_name);
-                                                astvist.previous_imports = self.imports.clone();
-                                                astvist.previous_file_name = self.file_name.clone();
-                                                let ast = full_moon::parse(&code);
-                                                if let Ok(ast) = ast {
-                                                    let ast = astvist.visit_ast(ast);
-                                                    // let bblock = Block::new();
-                                                    // bblock.with_stmts(ast.)
-                                                    let do_block = Do::new();
-                                                    let do_block= do_block.with_block(ast.nodes().to_owned());
-                                                    new_node = Stmt::Do(do_block);
-                                                    // println!("!o {:?}", &do_block);
-                                                } else {
-                                                    println!("Unable to parse file @ {}", load_path.to_str().unwrap());
-                                                }
-                                            }
+    //                                             let mut astvist = VistAst::default();
+    //                                             astvist.set_project_dir(load_path_parent.to_path_buf());
+    //                                             astvist.set_file_name(&load_file_name);
+    //                                             astvist.previous_imports = self.imports.clone();
+    //                                             astvist.previous_file_name = self.file_name.clone();
+    //                                             let ast = full_moon::parse(&code);
+    //                                             if let Ok(ast) = ast {
+    //                                                 let ast = astvist.visit_ast(ast);
+    //                                                 // let bblock = Block::new();
+    //                                                 // bblock.with_stmts(ast.)
+    //                                                 let do_block = Do::new();
+    //                                                 let do_block= do_block.with_block(ast.nodes().to_owned());
+    //                                                 new_node = Stmt::Do(do_block);
+    //                                                 // println!("!o {:?}", &do_block);
+    //                                             } else {
+    //                                                 println!("Unable to parse file @ {}", load_path.to_str().unwrap());
+    //                                             }
+    //                                         }
 
-                                        }
-                                        println!("load file: {} | {:?}", load_file_name, self.project_dir);
-                                    },
-                                    _ => {},
-                                }
-                            },
-                            _ => {},
-                        }
-                        // println!("{}", filename.to_string());
-                    },
-                    _=>{
+    //                                     }
+    //                                     println!("load file: {} | {:?}", load_file_name, self.project_dir);
+    //                                 },
+    //                                 _ => {},
+    //                             }
+    //                         },
+    //                         _ => {},
+    //                     }
+    //                     // println!("{}", filename.to_string());
+    //                 },
+    //                 _=>{
 
-                    }
-                }
-                // println!("{:?}", fnc.prefix().to_string());
-            },
-            _ => {}
-        };
-        new_node
-    }
+    //                 }
+    //             }
+    //             // println!("{:?}", fnc.prefix().to_string());
+    //         },
+    //         _ => {}
+    //     };
+    //     new_node
+    // }
     // fn visit_whitespace(&mut self, token:Token) ->Token {
      
     //     let mut new_token = token.clone();
@@ -137,6 +138,107 @@ impl VisitorMut for VistAst {
     //     new_token
 
     // }
+    fn visit_block(&mut self, node:full_moon::ast::Block) ->full_moon::ast::Block {
+        println!("blk {:#?}", node.to_string());
+        let mut stmts = Vec::from_iter(node.stmts_with_semicolon().map(|s| {
+            (s.0.clone(),Some(TokenReference::symbol(";").unwrap()))
+        }));
+        node.with_stmts(stmts)
+    }
+
+    fn visit_function_call_end(&mut self, node:full_moon::ast::FunctionCall) ->full_moon::ast::FunctionCall {
+        // println!("fnc<{:?}> = {:?}\n\n",node.to_string(), node);
+        let new_node = node.clone();
+        let notasn = node.prefix().to_string().contains("\n");
+        match node.prefix().to_string().trim() {
+            "_load" =>{
+                let mut fnbody = FunctionBody::new();
+            
+                let call_paren = node.suffixes().next().expect("called load without filename");
+                match call_paren {
+                    full_moon::ast::Suffix::Call(c) => {
+                        match c {
+                            Call::AnonymousCall(ac) => {
+                                let mut load_file_name = String::new();
+                                match ac {
+                                    full_moon::ast::FunctionArgs::Parentheses { parentheses: _, arguments } => {
+                                        let first_arg = arguments.iter().next();
+                                        if let Some(arg) = first_arg {
+                                            match arg {
+                                                full_moon::ast::Expression::Value { value, type_assertion:_ } => {
+                                                    match *value.clone() {
+                                                        full_moon::ast::Value::String(s) => {
+                                                            load_file_name = self.get_token_name(s.token_type());
+                                                        },
+                                                        _ => {
+                                                            println!("please just pass a string...");
+                                                        }
+                                                    }
+                                                },
+                                                _ => {println!("im sorry but i really cannot be bothered parsing, please just pass a string ");}
+                                            }
+                                        }
+                                    },
+                                    full_moon::ast::FunctionArgs::String(_) => todo!(),
+                                    _ => {
+                                        let pos =node.start_position().unwrap();
+                                        println!("invalid load @ {}:{}",pos.line(),pos.character());
+                                    },
+                                }
+                                if !load_file_name.is_empty() {
+
+                                    if load_file_name == self.previous_file_name {
+                                        println!("detected circular import, the import will have nothing.");
+                                    
+                                    }
+                                    else {
+                                        
+                                        let load_path = self.project_dir.join(&load_file_name);
+                                        let load_file = File::open(&load_path);
+                                        if load_file.is_err() {
+                                            println!("Unable to open / find file @ {}", load_path.to_str().unwrap());
+                                        }
+                                        self.imports.push(load_file_name.clone());
+                                        let mut code = String::new();
+                                        let load_path_parent = load_path.parent().unwrap();
+                                        load_file.unwrap().read_to_string(&mut code);
+
+                                        let mut astvist = VistAst::default();
+                                        astvist.set_project_dir(load_path_parent.to_path_buf());
+                                        astvist.set_file_name(&load_file_name);
+                                        astvist.previous_imports = self.imports.clone();
+                                        astvist.previous_file_name = self.file_name.clone();
+                                        let ast = full_moon::parse(&code);
+                                        if let Ok(ast) = ast {
+                                            let ast = astvist.visit_ast(ast).with_eof(TokenReference::symbol(";").unwrap());
+                                            let mut stmts = Vec::from_iter(ast.nodes().stmts_with_semicolon().map(|s| {
+                                                (s.0.clone(),Some(TokenReference::symbol(";").unwrap()))
+                                            }));
+                                            // stmts[stmts.len()] = (stmts[stmts.len()].0,Some(TokenReference::symbol(";").unwrap()));
+                                            fnbody= fnbody.with_block(ast.nodes().to_owned().with_stmts(stmts));
+                                        } else {
+                                            println!("Unable to parse file @ {}", load_path.to_str().unwrap());
+                                        }
+                                    }
+
+                                }
+                                println!("load file: {} | {:?}", load_file_name, self.project_dir);
+                            },
+                            _ => {},
+                        }
+                    },
+                    _ => {},
+                };
+                
+                let fnpog = Value::Function((TokenReference::new(vec![],Token::new(TokenType::Symbol {symbol: full_moon::tokenizer::Symbol::Function }),vec![]),fnbody));
+                let fnexpr = Expression::Value { value: Box::from(fnpog), type_assertion: None };
+                let expr = Expression::Parentheses { contained: ContainedSpan::new(TokenReference::symbol("(").unwrap(),TokenReference::symbol(")").unwrap()), expression: Box::from(fnexpr) };
+                full_moon::ast::FunctionCall::new(full_moon::ast::Prefix::Expression(expr))
+            }
+            _=>new_node
+        }
+    }
+
     fn visit_value(&mut self, node:full_moon::ast::Value) ->full_moon::ast::Value {
         let mut new_node = node.clone();
         match node {

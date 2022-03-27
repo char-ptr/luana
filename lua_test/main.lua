@@ -1,7 +1,7 @@
 
 print("wow poggers!")
 
-load("gamer.lua")
+;_load("gamer.lua")
 
 
 local poggers = "!import yo.json"
@@ -12,9 +12,13 @@ print(poggers.poggers,"!import b.txt")
 
 for _,v in next, "!import b.txt?raw" do 
 
-    print(string.char(v))
+    io.write(string.char(v))
 
 end
+io.flush()
+pog = 1;
+notpog = 2
 
--- local imglol = "!import pog.png"
+local mod = _load("./testmodule.lua")
 
+print("module: ",mod.poggers)
