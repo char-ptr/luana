@@ -35,3 +35,29 @@ jobs:
       #   with:
       #     name: my-artifact
       #     path: ./target/debug/luana
+  build-windows:
+
+    runs-on: windows-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+            components: rustfmt, clippy
+      - name: Build
+        run: cargo build --release --verbose
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Release Build"
+          files: |
+            target/release/luana.exe
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: my-artifact
+      #     path: ./target/debug/luana
