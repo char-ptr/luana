@@ -1,7 +1,7 @@
 
 print("wow poggers!")
 
-;_load("gamer.lua")
+_load("gamer.lua")
 
 
 local poggers = "!import yo.json"
