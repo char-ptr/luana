@@ -139,7 +139,11 @@ impl VisitorMut for vistAst {
             full_moon::ast::Value::String(s) => {
                 let content = self.get_token_name(s.token_type());
                 if content.starts_with("!import ") {
-                    let file_name = &content[8..];
+                    let mut file_name = &content[8..];
+                    let raw_pos = file_name.find("?raw");
+                    if let Some(raw_start) = raw_pos {
+                        file_name = &file_name[0..raw_start]
+                    }
                     println!("importing file: {}", file_name);
                     let load_path = self.project_dir.join(file_name);
                     let mut load_file = File::open(&load_path);
@@ -147,23 +151,41 @@ impl VisitorMut for vistAst {
                         println!("Unable to open / find file @ {}", load_path.to_str().unwrap());
                     }
                     self.imports.push(file_name.to_string());
-                    let mut file_content = String::new();
-                    load_file.unwrap().read_to_string(&mut file_content);
-                    match load_path.extension().unwrap().to_str().unwrap() {
-                        "json" => {
-                            let json_file: Result<serde_json::Value,_> = serde_json::from_str(&file_content);
-                            if let Ok(json_file) = json_file {
-                                // let table = self.json_value_to_lua(json_file);
-                                new_node = self.json_value_to_lua(json_file)
+                    
+                    if raw_pos.is_some() {
+                        let mut file_bytes = Vec::new();
+                        load_file.unwrap().read_to_end(&mut file_bytes);
+
+                        let t = TableConstructor::new();
+                        let mut punct = Punctuated::<Field>::new(); 
+                        for val in file_bytes {
+                            let expr = Expression::Value { value: Box::from(Value::Number(TokenReference::new(vec![], Token::new(TokenType::Number { text: val.to_string().into() }), vec![]))), type_assertion: None };
+                            let field = Field::NoKey(expr);
+                            punct.push(Pair::new(field, Some(TokenReference::symbol(",").unwrap())));
+                        }
+                        new_node = Value::TableConstructor(t.with_fields(punct));
+                    }
+                    else {
+                        
+                        let mut file_content = String::new();
+                        load_file.unwrap().read_to_string(&mut file_content);
+                        match load_path.extension().unwrap().to_str().unwrap() {
+                            "json" => {
+                                let json_file: Result<serde_json::Value,_> = serde_json::from_str(&file_content);
+                                if let Ok(json_file) = json_file {
+                                    // let table = self.json_value_to_lua(json_file);
+                                    new_node = self.json_value_to_lua(json_file)
+                                }
+                            },
+                            _=>{
+                                let token = Token::new(TokenType::StringLiteral { literal: file_content.replace("\r\n","\\n").replace("\t","\\t").into(), multi_line: None, quote_type: full_moon::tokenizer::StringLiteralQuoteType::Single });
+                                let tkn_ref = s.with_token(token);
+                                // tkn_ref.
+                                new_node = Value::String(tkn_ref);
                             }
-                        },
-                        _=>{
-                            let token = Token::new(TokenType::StringLiteral { literal: file_content.replace("\r\n","\\n").replace("\t","\\t").into(), multi_line: None, quote_type: full_moon::tokenizer::StringLiteralQuoteType::Single });
-                            let tkn_ref = s.with_token(token);
-                            // tkn_ref.
-                            new_node = Value::String(tkn_ref);
                         }
                     }
+                
                 }
                 // println!("{}", content);
             },
