@@ -1,6 +1,6 @@
 # luana
 
-lua packager
+lua packager for lua5.2+ (with support for some luau features)
 
 ## features
 currently has support for 
