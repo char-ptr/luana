@@ -2,6 +2,8 @@
 name = "luana"
 version = "0.1.0"
 edition = "2021"
+description="Lua bundler / packer"
+authors = ["Luna"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -9,3 +11,4 @@ edition = "2021"
 full_moon={version="*",features=["roblox","lua52"]}
 serde = {version="*", features=["derive"]}
 serde_json = {version="*"}
+clap = {version="*", features=["derive"]}

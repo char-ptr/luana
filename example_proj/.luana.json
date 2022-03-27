@@ -1,0 +1,4 @@
+{
+  "entry_point": "main.lua",
+  "minification": true
+}
