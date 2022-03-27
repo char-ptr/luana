@@ -19,7 +19,7 @@ this repo is still under development, so there is a few bugs which will eventual
 
 ## getting started
 
-To get started go to the [releases](https://github.com/pozm/luana/releases) tab and download the latest release.
+To get started go to the [releases](https://github.com/pozm/luana/releases)  tab and download latest win/linux.
 once you have done that you will probably want to add the exe to your path, although it is not required it is alot easier to use the tool and is recommended.
 
 from there you can run `luana -h` to get help.
