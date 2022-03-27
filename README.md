@@ -15,6 +15,23 @@ Look at lua_test folder to see what it looks like.
 
 this repo is still under development, so there is a few bugs which will eventually be fixed (?maybe)
 
+## getting started
+
+To get started go to the [releases](https://github.com/pozm/luana/releases) tab and download the latest release.
+once you have done that you will probably want to add the exe to your path, although it is not required it is alot easier to use the tool and is recommended.
+
+from there you can run `luana -h` to get help.
+
+for where you need to provide a path you can provide relative paths such as `.`, `./proj`, etc.
+
+### making a new project
+
+run `luana init <project name> <?path>` to create a new luana project!
+
+### building project
+
+run `luana build <path>` to build the project.
+
 ## other cool package managers/bundlers 😎
 
 - [Tape](https://github.com/Belkworks/tape) by [safazi](https://github.com/safazi)
